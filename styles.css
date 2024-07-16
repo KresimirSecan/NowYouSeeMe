@@ -1,98 +1,25 @@
+canvas {
+    padding: 0;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1; /* Ensure it's behind the main content */
+}
+
 body {
+    padding: 0;
     margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #ecf0f1;
+    width: 300px; /* Adjust this width as needed */
 }
 
-.container {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-}
-
-.sidebar {
-    width: 60px;
-    background-color: #34495e;
-    color: white;
-    padding: 15px;
-    box-sizing: border-box;
-    position: relative;
-    transition: width 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.sidebar:hover {
-    width: 250px;
-}
-
-.sidebar h2 {
-    display: none;
+#controls {
+    padding: 0;
     margin: 0;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #7f8c8d;
+    position: absolute;
     width: 100%;
     text-align: center;
-}
-
-.sidebar:hover h2 {
-    display: block;
-}
-
-.input-container {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    width: 100%;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.sidebar:hover .input-container {
-    opacity: 1;
-}
-
-.input-container label {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: #bdc3c7;
-    cursor: pointer;
-    background-color: #1abc9c;
-    padding: 10px 20px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.input-container label:hover {
-    background-color: #16a085;
-}
-
-.input-container input {
-    display: none;
-}
-
-.input-container #file-name {
-    margin-top: 10px;
-    font-size: 14px;
-    color: white;
-}
-
-.main-content {
-    flex-grow: 1;
-    background-color: #ecf0f1;
-    padding: 40px;
-    box-sizing: border-box;
-}
-
-.main-content h1 {
-    margin-top: 0;
-    font-size: 28px;
-    color: #34495e;
-}
-
-.main-content p {
-    font-size: 16px;
-    color: #7f8c8d;
-    line-height: 1.6;
+    top: 20px;
+    color: #AAAAAA;
+    font-weight: bold;
 }
