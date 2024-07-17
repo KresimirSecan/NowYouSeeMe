@@ -14,8 +14,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animation);
 
-let textGeometry;
-let texts = [];
+
+export let layerSizes = [];
+const texts = [];
 
 $('body').append(renderer.domElement);
 
@@ -30,7 +31,7 @@ function getLayerValues() {
             newLayers.push(parseInt(value, 10)); // Parse as integer
         }
     });
-
+    layerSizes = newLayers.slice();
     drawNeuralNet(newLayers,6);
 }
 
@@ -187,11 +188,11 @@ function drawNeuralNet(layerSizes, layerDistance) {
     for (let layerSize of layerSizes) {
         const layerPosition = [];
         const a = Math.sqrt(layerSize);
-        let xPos = (a / 2) * distance;
+        let xPos = -(a / 2) * distance;
 
         if (layerSize < 11) {
             let yPos = 0;
-            xPos = (layerSize / 2) * distance;
+            xPos = -(layerSize / 2) * distance;
 
             for (let j = 0; j < layerSize; j++) {
                 const position = new THREE.Vector3(xPos, yPos, zPos);
@@ -202,11 +203,11 @@ function drawNeuralNet(layerSizes, layerDistance) {
                 sphere.position.copy(position);
                 scene.add(sphere);
 
-                xPos -= distance;
+                xPos += distance;
             }
         } else {
             let i = 0;
-            let yPos = xPos;
+            let yPos = -xPos;
 
             while (i < layerSize) {
                 for (let j = 0; j < a; j++) {
@@ -221,7 +222,7 @@ function drawNeuralNet(layerSizes, layerDistance) {
                         i += 1;
                     }
                 }
-                xPos -= distance;
+                xPos += distance;
                 yPos = (a / 2) * distance;
             }
         }
@@ -245,10 +246,10 @@ function addLabelsToLastLayer(layerPositions, labels) {
             let position = lastLayerPositions[i];
 
             // Create label text geometry
-            textGeometry = new TextGeometry(labels[i].toString(), {
+            const textGeometry = new TextGeometry(labels[i].toString(), {
                 font: font,
                 size: 1, // Size of the text
-                height: 0.01 // Thickness of the text
+                depth: 0.01 // Thickness of the text
             });
 
             // Create text mesh and position it behind neuron
@@ -263,5 +264,6 @@ function addLabelsToLastLayer(layerPositions, labels) {
 
 
 $(() => {
+    
     getLayerValues();
 })
