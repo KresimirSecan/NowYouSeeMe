@@ -61,12 +61,15 @@ function parseCSV(file) {
         
         console.log("TrainTestSplit: ")
         console.log("Test data length: ",testData.labels.length)
-        console.log(`Label: ${testData.labels[0]}`);
-        testData.pixels[0].print(); 
-        console.log('\n');
-        console.log("Train data length: ",trainData.labels.length);
-        console.log(`Label: ${trainData.labels[0]}`);
-        trainData.pixels[0].print();
+        const labl = tf.tensor(testData.labels);
+        const labels = Array.from(tf.unique(labl).values.dataSync()).sort();
+        console.log(labels)
+        // console.log(`Label: ${testData.labels[0]}`);
+        // testData.pixels[0].print(); 
+        // console.log('\n');
+        // console.log("Train data length: ",trainData.labels.length);
+        // console.log(`Label: ${trainData.labels[0]}`);
+        // trainData.pixels[0].print();
     };
     reader.readAsText(file);
 }
