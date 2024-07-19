@@ -48,9 +48,7 @@ function deleteLayer(index) {
     displayLayers(); // Redraw layers
 }
 
-function updateScene() {
-    drawNeuralNet(layers, 6);
-}
+
 
 // Handle input using jQuery
 $('#file-upload').on('change', function (event) {
@@ -88,7 +86,7 @@ function parseCSV(csv) {
 
 // Display data using jQuery
 function displayData(data) {
-    for (let i = 0; i < Math.min(3, data.length); i++) {
+    for (let i = 0; i < Math.min(10, data.length); i++) {
         console.log(`element ${i + 1}:`, data[i]);
     }
 }
