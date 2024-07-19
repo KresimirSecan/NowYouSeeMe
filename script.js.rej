@@ -1,0 +1,9 @@
+diff a/script.js b/script.js	(rejected hunks)
+@@ -48,6 +48,7 @@
+     displayLayers(); // Redraw layers
+ }
+ 
++
+ 
+ // Handle input using jQuery
+ $('#file-upload').on('change', function (event) {

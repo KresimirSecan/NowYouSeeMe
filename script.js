@@ -1,24 +1,26 @@
-let layers = [784,128,64,32,16,10];
-
+let layers = [784, 128, 64, 32, 16, 10];
 let collapse = false;
 
-function toggleCollapse(){
+
+// Function to toggle collapse
+function toggleCollapse() {
     collapse = !collapse;
     let button = $('#collapse-btn');
     button.empty();
-    if(collapse) {
-        button.append('<i class="bi bi-chevron-down"></i>')
+    if (collapse) {
+        button.append('<i class="bi bi-chevron-down"></i>');
     } else {
-        button.append('<i class="bi bi-chevron-up"></i>')
+        button.append('<i class="bi bi-chevron-up"></i>');
     }
 }
 
-// Display file name using jQuery
+// Function to display file name using jQuery
 function displayFileName() {
     const fileName = $('#file-upload').prop('files')[0]?.name || '';
     $('#file-name').text(fileName);
 }
 
+// Function to display layers
 function displayLayers() {
     let layerContainer = $('#layer-container');
     layerContainer.empty();
@@ -37,24 +39,30 @@ function displayLayers() {
     });
 }
 
+// Function to add a layer
 function addLayer() {
     let value = $('#layer-input').val();
     layers.push(+value);
     displayLayers();
 }
 
+// Function to delete a layer
 function deleteLayer(index) {
     layers.splice(index, 1); // Remove element from array
     displayLayers(); // Redraw layers
 }
 
+<<<<<<< HEAD
+
+=======
+// Function to update scene
+function updateScene() {
+    drawNeuralNet(layers, 6);
+}
+>>>>>>> 47099ff328d1e2ef5ae150e25f5045a1b595ebd3
 
 
-// Handle input using jQuery
-$('#file-upload').on('change', function (event) {
-    handleFileSelect(event);
-});
-
+<<<<<<< HEAD
 function handleFileSelect(event) {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -86,11 +94,15 @@ function parseCSV(csv) {
 
 // Display data using jQuery
 function displayData(data) {
-    for (let i = 0; i < Math.min(10, data.length); i++) {
+    for (let i = 0; i < Math.min(3, data.length); i++) {
         console.log(`element ${i + 1}:`, data[i]);
     }
 }
 
 $(() => {
+=======
+// Document ready function
+$(document).ready(function () {
+>>>>>>> 47099ff328d1e2ef5ae150e25f5045a1b595ebd3
     displayLayers();
 });
