@@ -2,6 +2,8 @@ let testPercentage = 0;
 let columnNames = [];
 let selectedLabelColumn = '';
 
+export let labels = [];
+
 
 //Handle file input 
 $('#file-upload').on('change', function (event) {
@@ -62,8 +64,7 @@ function parseCSV(file) {
         console.log("TrainTestSplit: ")
         console.log("Test data length: ",testData.labels.length)
         const labl = tf.tensor(testData.labels);
-        const labels = Array.from(tf.unique(labl).values.dataSync()).sort();
-        console.log(labels)
+        labels = Array.from(tf.unique(labl).values.dataSync()).sort();
         // console.log(`Label: ${testData.labels[0]}`);
         // testData.pixels[0].print(); 
         // console.log('\n');

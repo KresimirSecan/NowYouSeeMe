@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-
+import { labels } from './parse.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5072A);
@@ -170,9 +170,6 @@ $(window).on('resize', () => {
 function drawNeuralNet(layerSizes, layerDistance) {
     // Clear the scene
     scene.remove.apply(scene, scene.children);
-
-    // Labels for neurons
-    let labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     // Sphere geometry and material for neurons
     const sphereGeometry = new THREE.SphereGeometry(0.5, 8, 8);
