@@ -3,7 +3,8 @@ let columnNames = [];
 let selectedLabelColumn = '';
 
 export let labels = [];
-
+export let trainData = [];
+export let testData = [];
 
 //Handle file input 
 $('#file-upload').on('change', function (event) {
@@ -59,7 +60,7 @@ function parseCSV(file) {
         //Display
         console.log(`element parsed:`, data[0]);
     
-        const { trainData, testData } = trainTestSplit(data, testPercentage);
+        ({trainData, testData} = trainTestSplit(data, testPercentage));
         
         console.log("TrainTestSplit: ")
         console.log("Test data length: ",testData.labels.length)
@@ -71,6 +72,7 @@ function parseCSV(file) {
         // console.log("Train data length: ",trainData.labels.length);
         // console.log(`Label: ${trainData.labels[0]}`);
         // trainData.pixels[0].print();
+        alert("Data submitted.");
     };
     reader.readAsText(file);
 }
