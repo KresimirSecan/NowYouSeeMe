@@ -40,6 +40,7 @@ function createModel(layerSizes) {
     return model;
 }
 
+// Function to train a model
 async function trainModel(model, trainData, trainLabels) {
     if (!trainData || !trainLabels) {
         throw new Error('Training data and labels must be provided');

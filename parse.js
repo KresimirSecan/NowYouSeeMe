@@ -79,22 +79,25 @@ function parseCSV(file) {
         console.log("Test data length: ", testData.labels.length);
         const labl = tf.tensor(testData.labels);
         labels = Array.from(tf.unique(labl).values.dataSync()).sort();
-
+       
         let alertMessage = "Data submitted.";
         if (trainDataTrimmed || testDataTrimmed) {
             alertMessage += " Note: The data was sliced to fit the 30,000 samples limit.";
         }
         alert(alertMessage);
+        $('#submit-message').hide();
     };
     reader.readAsText(file);
 }
 
 // Handle submit button click
 $('#submitPercentage').on('click', function () {
+    $('#submit-message').show();
     let value = parseInt($('#testPercentage').val(), 10);
     if (isNaN(value) || value < 0 || value > 100) {
         alert('Please enter a valid percentage for test data between 0 and 100.');
-        $('#testPercentage').val(testPercentage); 
+        $('#testPercentage').val(testPercentage);
+        $('#submit-message').hide(); 
     } else {
         testPercentage = value;
         console.log('Test Data Percentage:', testPercentage);
@@ -103,6 +106,7 @@ $('#submitPercentage').on('click', function () {
     selectedLabelColumn = $('#labelColumn').val();
     if (!selectedLabelColumn) {
         alert('Please select a label column.');
+        $('#submit-message').hide();
     } else {
         console.log('Selected Label Column:', selectedLabelColumn);
         const file = $('#file-upload').prop('files')[0];
