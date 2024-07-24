@@ -24,35 +24,24 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 </head>
 <body>
-    <div id="controls">
-        WSAD - move &nbsp; | &nbsp; Q/E - up/down &nbsp; | &nbsp; Esc - stop | &nbsp; Mouseclick - start
-    </div>
     <div class="card overflow-auto">
         <div class="card-header d-flex justify-content-center align-items-center">
-           <h2>NYSM</h2>
-           <button class="btn" id="collapse-btn" type="button" onclick="toggleCollapse()" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-            <i class="bi bi-chevron-up"></i>
-          </button>
+            <h2>NYSM</h2>
+            <button class="btn" id="collapse-btn" type="button" onclick="toggleCollapse()" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                <i class="bi bi-chevron-up"></i>
+            </button>
         </div>
         <div class="collapse show" id="collapseExample">
             <div class="card-body">
-                <h3>Architecture:</h3>
-                <hr>
-                <div id="layer-container"></div>
-                <div class="input-group mb-3">
-                    <button class="btn btn-primary layer-btn" type="button" id="button-addon1" onclick="addLayer()">
-                        <i class="bi bi-plus-lg"></i>
-                    </button>
-                    <input type="number" class="form-control" id="layer-input" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                <!-- Loading Data Section -->
+                <h3>Loading Data:</h3>
+                <div class="form-group mt-3">
+                    <label for="file-upload" class="form-label custom-file-upload">
+                        Upload File
+                    </label>
+                    <input class="form-control" type="file" id="file-upload" name="file-upload" accept=".csv" onchange="displayFileName()">
+                    <p class="card-text" id="file-name"></p>
                 </div>
-                <button class="btn btn-primary" id="render">Render</button>
-                <button class="btn btn-success" id="train">Train</button>
-                <hr>
-                <label for="file-upload" class="form-label custom-file-upload">
-                    Upload File
-                </label>
-                <input class="form-control" type="file" id="file-upload" name="file-upload" accept=".csv" onchange="displayFileName()">
-                <p class="card-text" id="file-name"></p>
                 <div class="form-group mt-3">
                     <label for="testPercentage">Percentage of Test Data</label>
                     <div class="input-group">
@@ -67,6 +56,19 @@
                     </select>
                 </div>
                 <button class="btn btn-primary mt-2" id="submitPercentage">Submit</button>
+                <p id="submit-message" style="color: red; display: none;">Data is processing...</p>
+                <hr>
+                <!-- Architecture Section -->
+                <h3>Architecture:</h3>
+                <div id="layer-container"></div>
+                <div class="input-group mb-3">
+                    <button class="btn btn-primary layer-btn" type="button" id="button-addon1" onclick="addLayer()">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                    <input type="number" class="form-control" id="layer-input" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                </div>
+                <button class="btn btn-primary" id="render">Render</button>
+                <button class="btn btn-success" id="train">Train</button>
             </div>
         </div>
     </div>
@@ -95,6 +97,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="controls">
+        WSAD - move &nbsp; | &nbsp; Q/E - up/down &nbsp; | &nbsp; Esc - stop | &nbsp; Mouseclick - start
     </div>
 
     <script src="script.js"></script>
