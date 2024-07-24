@@ -5,8 +5,9 @@ let selectedLabelColumn = '';
 export let labels = [];
 export let trainData = [];
 export let testData = [];
+export let dataAvailable = false;
 
-//Handle file input 
+// Handle file input 
 $('#file-upload').on('change', function (event) {
     handleFileSelect(event);
 });
@@ -21,7 +22,7 @@ function handleFileSelect(event) {
     reader.readAsText(file);
 }
 
-//Function to populate column dropdown
+// Function to populate column dropdown
 function populateColumnDropdown(csv) {
     const lines = csv.trim().split('\n');
     columnNames = lines[0].trim().split(',');
@@ -33,7 +34,7 @@ function populateColumnDropdown(csv) {
     });
 }
 
-//Function to parse CSV using the selected label column
+// Function to parse CSV using the selected label column
 function parseCSV(file) {
     const reader = new FileReader();
     reader.onload = function (e) {
@@ -57,27 +58,38 @@ function parseCSV(file) {
             }
         });
 
-        //Display
-        console.log(`element parsed:`, data[0]);
-    
         ({trainData, testData} = trainTestSplit(data, testPercentage));
-        
-        console.log("TrainTestSplit: ")
-        console.log("Test data length: ",testData.labels.length)
+
+        //Trim to fit
+        let trainDataTrimmed = false;
+        let testDataTrimmed = false;
+
+        if (trainData.labels.length > 30000) {
+            trainData.labels = trainData.labels.slice(0, 30000);
+            trainData.pixels = trainData.pixels.slice(0, 30000);
+            trainDataTrimmed = true;
+        }
+        if (testData.labels.length > 30000) {
+            testData.labels = testData.labels.slice(0, 30000);
+            testData.pixels = testData.pixels.slice(0, 30000);
+            testDataTrimmed = true;
+        }
+
+        console.log("TrainTestSplit: ");
+        console.log("Test data length: ", testData.labels.length);
         const labl = tf.tensor(testData.labels);
         labels = Array.from(tf.unique(labl).values.dataSync()).sort();
-        // console.log(`Label: ${testData.labels[0]}`);
-        // testData.pixels[0].print(); 
-        // console.log('\n');
-        // console.log("Train data length: ",trainData.labels.length);
-        // console.log(`Label: ${trainData.labels[0]}`);
-        // trainData.pixels[0].print();
-        alert("Data submitted.");
+
+        let alertMessage = "Data submitted.";
+        if (trainDataTrimmed || testDataTrimmed) {
+            alertMessage += " Note: The data was sliced to fit the 30,000 samples limit.";
+        }
+        alert(alertMessage);
     };
     reader.readAsText(file);
 }
 
-//Handle submit button click
+// Handle submit button click
 $('#submitPercentage').on('click', function () {
     let value = parseInt($('#testPercentage').val(), 10);
     if (isNaN(value) || value < 0 || value > 100) {
@@ -95,14 +107,13 @@ $('#submitPercentage').on('click', function () {
         console.log('Selected Label Column:', selectedLabelColumn);
         const file = $('#file-upload').prop('files')[0];
         if (file) {
+            dataAvailable = true;
             parseCSV(file);
         }
     }
-    
 });
 
-
-//Data is formateda as an array of ['label', pixelArray]
+// Data is formatted as an array of ['label', pixelArray]
 function trainTestSplit(data, testPercentage) {
     const testSize = Math.floor(data.length * (testPercentage / 100));
 
@@ -112,7 +123,7 @@ function trainTestSplit(data, testPercentage) {
 
     const pixelTensors = pixels.map(pixelArray => tf.tensor(pixelArray));
 
-    //traintestsplit
+    // Train-test split
     const trainPixels = pixelTensors.slice(testSize);
     const testPixels = pixelTensors.slice(0, testSize);
     const trainLabels = labels.slice(testSize);
@@ -130,11 +141,10 @@ function trainTestSplit(data, testPercentage) {
     };
 }
 
-//inplace shuffle function
+// In-place shuffle function
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
-
