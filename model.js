@@ -3,14 +3,48 @@ import { trainData } from "./parse.js";
 import { testData } from "./parse.js";
 import { dataAvailable } from "./parse.js";
 
+export let activations = []
+export let model;
+
+class CustomModel extends tf.Sequential {
+    constructor() {
+        super();
+    }
+
+    async predictWithActivations(inputTensor) {
+        const modelLayers = this.layers;
+
+        if (inputTensor.shape.length === 1) {
+            inputTensor = inputTensor.expandDims(0);
+        }
+
+    
+        let activationTensor = inputTensor;
+        const activationsArray = [];
+    
+        activationsArray.push(Array.from(inputTensor.dataSync()));
+        // Perform forward pass through all layers and collect activations
+        for (let i = 0; i < modelLayers.length; i++) {
+            activationTensor = modelLayers[i].apply(activationTensor);
+            const activations = activationTensor.dataSync();
+            if(i > 0){
+                activationsArray.push(Array.from(activations));
+            }
+        }
+    
+        return activationsArray;
+    }
+}
+
+
+
 // Function to create a model
 function createModel(layerSizes) {
     if (!Array.isArray(layerSizes) || layerSizes.length === 0) {
         throw new Error('layerSizes must be a non-empty array');
     }
 
-    const model = tf.sequential();
-
+    const model = new CustomModel();
     layerSizes.forEach((size, index) => {
         if (index === 0) {
             model.add(tf.layers.dense({
@@ -32,8 +66,8 @@ function createModel(layerSizes) {
     });
 
     model.compile({
-        optimizer: 'adam',
-        loss: 'categoricalCrossentropy',
+        optimizer: 'sgd',
+        loss: 'meanSquaredError',
         metrics: ['accuracy']
     });
 
@@ -41,7 +75,7 @@ function createModel(layerSizes) {
 }
 
 // Function to train a model
-async function trainModel(model, trainData, trainLabels) {
+async function trainModel(trainData, trainLabels) {
     if (!trainData || !trainLabels) {
         throw new Error('Training data and labels must be provided');
     }
@@ -57,6 +91,7 @@ async function trainModel(model, trainData, trainLabels) {
         callbacks: {
             onEpochEnd: (epoch, logs) => {
                 $('#epoch-info').text(`Epoch ${epoch + 1}: loss = ${logs.loss.toFixed(4)}, accuracy = ${logs.acc.toFixed(4)}`);
+                console.log(`Epoch ${epoch + 1}: loss = ${logs.loss.toFixed(4)}, accuracy = ${logs.acc.toFixed(4)}`);
                 finalAccuracy = logs.acc;
             },
             onTrainEnd: () => {
@@ -68,12 +103,6 @@ async function trainModel(model, trainData, trainLabels) {
     });
 }
 
-// Handle Render button click
-$('#render').on('click', () => {
-    let model = createModel(layerSizes);
-    model.summary();
-});
-
 // Handle Train button click
 $('#train').on('click', async () => {
     if (!dataAvailable) {
@@ -81,9 +110,8 @@ $('#train').on('click', async () => {
         return;
     }
 
-    if (window.currentModel) {
-        window.currentModel.dispose();
-        window.currentModel = createModel(layerSizes);
+    if (model) {
+        model.dispose();
     }
     tf.disposeVariables();
 
@@ -96,11 +124,13 @@ $('#train').on('click', async () => {
     setTimeout(async () => {
         // Force browser to repaint before starting training
         requestAnimationFrame(async () => {
-            const model = createModel(layerSizes);
+            model = createModel(layerSizes);
             const oneHotEncodedLabels = tf.oneHot(trainData.labels.map(label => parseInt(label, 10)), 10);
 
-            await trainModel(model, tf.stack(trainData.pixels), oneHotEncodedLabels);
+            await trainModel(tf.stack(trainData.pixels), oneHotEncodedLabels);
             console.log("Model trained");
+
         });
     }, 0); 
 });
+

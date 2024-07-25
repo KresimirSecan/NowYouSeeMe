@@ -1,8 +1,9 @@
-
 import * as THREE from 'three';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { labels } from './parse.js';
+import { labels, trainData } from './parse.js';
+import { model } from './model.js';
+import { testData } from "./parse.js";
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5072A);
@@ -14,9 +15,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animation);
 
-
 export let layerSizes = [];
 const texts = [];
+let layerPositions = [];
+let activationsArray = [];
 
 $('body').append(renderer.domElement);
 
@@ -24,7 +26,7 @@ $('#render').on('click', getLayerValues);
 
 function getLayerValues() {
     let newLayers = [];
-    console.log(camera.rotation)
+    console.log(camera.rotation);
     $('.layer-input').each(function() {
         let value = $(this).val();
         if (value) {
@@ -32,7 +34,7 @@ function getLayerValues() {
         }
     });
     layerSizes = newLayers.slice();
-    drawNeuralNet(newLayers,6);
+    drawNeuralNet(6);
 }
 
 // Variables to track the movement
@@ -148,12 +150,11 @@ function updateCameraPosition() {
     const quaternion = new THREE.Quaternion();
     quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
     camera.quaternion.copy(quaternion);
-    if(texts.length > 0){
-        for(let textMesh of texts) {
+    if (texts.length > 0) {
+        for (let textMesh of texts) {
             textMesh.quaternion.copy(quaternion);
         }
     }
-
 }
 
 function animation() {
@@ -167,7 +168,7 @@ $(window).on('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-function drawNeuralNet(layerSizes, layerDistance) {
+function drawNeuralNet(layerDistance) {
     // Clear the scene
     scene.remove.apply(scene, scene.children);
 
@@ -175,13 +176,18 @@ function drawNeuralNet(layerSizes, layerDistance) {
     const sphereGeometry = new THREE.SphereGeometry(0.5, 8, 8);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x444444 });
 
+    // Calculate total number of neurons
+    let totalNeurons = layerSizes.reduce((acc, size) => acc + size, 0);
+    
+    // Create InstancedMesh for neurons
+    const instancedMesh = new THREE.InstancedMesh(sphereGeometry, sphereMaterial, totalNeurons);
+
     // Distance between neurons
     const distance = 2;
     let zPos = 0;
+    let instanceIndex = 0;
 
     // Store positions of spheres for each layer
-    const layerPositions = [];
-
     for (let layerSize of layerSizes) {
         const layerPosition = [];
         const a = Math.sqrt(layerSize);
@@ -195,10 +201,11 @@ function drawNeuralNet(layerSizes, layerDistance) {
                 const position = new THREE.Vector3(xPos, yPos, zPos);
                 layerPosition.push(position);
 
-                // Create neuron sphere
-                const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                sphere.position.copy(position);
-                scene.add(sphere);
+                // Set instance matrix
+                const matrix = new THREE.Matrix4();
+                matrix.setPosition(position);
+                instancedMesh.setMatrixAt(instanceIndex, matrix);
+                instanceIndex++;
 
                 xPos += distance;
             }
@@ -212,25 +219,65 @@ function drawNeuralNet(layerSizes, layerDistance) {
                         const position = new THREE.Vector3(xPos, yPos, zPos);
                         layerPosition.push(position);
 
-                        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-                        sphere.position.copy(position);
-                        scene.add(sphere);
-                        yPos -= distance;
+                        // Set instance matrix
+                        const matrix = new THREE.Matrix4();
+                        matrix.setPosition(position);
+                        instancedMesh.setMatrixAt(instanceIndex, matrix);
+                        instanceIndex++;
+
+                        xPos += distance;
                         i += 1;
                     }
                 }
-                xPos += distance;
-                yPos = (a / 2) * distance;
+                xPos = -(a / 2) * distance;
+                yPos -= distance;
             }
         }
 
         layerPositions.push(layerPosition);
         zPos -= layerDistance;
     }
-    addLabelsToLastLayer(layerPositions,labels);
+
+    // Add instanced mesh to the scene
+    scene.add(instancedMesh);
+
+    // Create lines to connect neurons between layers
+    // const lineMaterial = new THREE.LineBasicMaterial({
+    //     color: 0x000000, // Darker color
+    //     linewidth: 2,   // Thicker lines (note: linewidth may only work on some systems)
+    //     transparent: true,
+    //     opacity: 0.5    // Transparent
+    // });
+
+    // const linesGeometry = new THREE.BufferGeometry();
+    // const positions = [];
+
+    // for (let l = 0; l < layerPositions.length - 1; l++) {
+    //     const currentLayer = layerPositions[l];
+    //     const nextLayer = layerPositions[l + 1];
+
+    //     for (let i = 0; i < currentLayer.length; i++) {
+    //         for (let j = 0; j < nextLayer.length; j++) {
+    //             positions.push(currentLayer[i].x, currentLayer[i].y, currentLayer[i].z);
+    //             positions.push(nextLayer[j].x, nextLayer[j].y, nextLayer[j].z);
+    //         }
+    //     }
+    // }
+
+    // const positionAttribute = new THREE.Float32BufferAttribute(positions, 3);
+    // linesGeometry.setAttribute('position', positionAttribute);
+
+    // const lineSegments = new THREE.LineSegments(linesGeometry, lineMaterial);
+    // scene.add(lineSegments);
+
+    addLabelsToLastLayer(labels);
+    if(activationsArray.length > 0) {
+        highlightActivatedNeurons();
+    }
 }
 
-function addLabelsToLastLayer(layerPositions, labels) {
+
+function addLabelsToLastLayer(labels) {
     const fontLoader = new FontLoader();
     let lastLayerPositions = layerPositions[layerPositions.length - 1];
 
@@ -258,9 +305,41 @@ function addLabelsToLastLayer(layerPositions, labels) {
     });
 }
 
+function highlightActivatedNeurons() {
+
+    layerPositions.forEach((layerPosition, layerIndex) => {
+        if (!Array.isArray(layerPosition)) {
+            console.error(`layerPosition at index ${layerIndex} is not an array`);
+            return;
+        }
+
+        const layerActivation = activationsArray[layerIndex] || [];
+        if (!Array.isArray(layerActivation)) {
+            console.error(`layerActivation at index ${layerIndex} is not an array`);
+            return;
+        }
+
+        layerPosition.forEach((position, neuronIndex) => {
+            if (layerActivation[neuronIndex] > 0.5) { // Assuming ReLU activation
+                const geometry = new THREE.SphereGeometry(0.6, 8, 8);
+                const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 });
+                const sphere = new THREE.Mesh(geometry, material);
+                sphere.position.copy(position);
+                scene.add(sphere);
+            }
+        });
+    });
+}
 
 
 $(() => {
-    
     getLayerValues();
+});
+
+
+$("#predict").on("click", async () => {
+    let num = $("#test-select").val();
+    activationsArray = await model.predictWithActivations(trainData.pixels[num]);
+    drawNeuralNet(6);
+    highlightActivatedNeurons();
 })
