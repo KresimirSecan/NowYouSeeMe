@@ -9,7 +9,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5072A);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-camera.position.set(25, 25, 25);
+camera.position.set( 57.24082474732504, 49.86810165701719, 9.762899239404861);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,8 +45,8 @@ let moveRight = false;
 let moveUp = false;
 let moveDown = false;
 let moveSpeed = 0.25;
-let yaw = 0;
-let pitch = 0;
+let yaw = 1.2740000000000007;
+let pitch = -0.7560000000000004;
 let mouseSensitivity = 0.002;
 
 // Event listeners for keyboard input
@@ -172,6 +172,8 @@ function drawNeuralNet(layerDistance) {
     // Clear the scene
     scene.remove.apply(scene, scene.children);
 
+    layerPositions.length = 0;
+
     // Sphere geometry and material for neurons
     const sphereGeometry = new THREE.SphereGeometry(0.5, 8, 8);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x444444 });
@@ -271,9 +273,6 @@ function drawNeuralNet(layerDistance) {
     // scene.add(lineSegments);
 
     addLabelsToLastLayer(labels);
-    if(activationsArray.length > 0) {
-        highlightActivatedNeurons();
-    }
 }
 
 
@@ -306,7 +305,6 @@ function addLabelsToLastLayer(labels) {
 }
 
 function highlightActivatedNeurons() {
-
     layerPositions.forEach((layerPosition, layerIndex) => {
         if (!Array.isArray(layerPosition)) {
             console.error(`layerPosition at index ${layerIndex} is not an array`);
@@ -319,17 +317,33 @@ function highlightActivatedNeurons() {
             return;
         }
 
-        layerPosition.forEach((position, neuronIndex) => {
-            if (layerActivation[neuronIndex] > 0.5) { // Assuming ReLU activation
-                const geometry = new THREE.SphereGeometry(0.6, 8, 8);
-                const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 });
-                const sphere = new THREE.Mesh(geometry, material);
-                sphere.position.copy(position);
-                scene.add(sphere);
-            }
-        });
+        const threshold = 0.5;
+
+        if (layerIndex === layerPositions.length - 1) { // Output layer with softmax
+            const maxActivation = Math.max(...layerActivation);
+            layerPosition.forEach((position, neuronIndex) => {
+                if (layerActivation[neuronIndex] === maxActivation) {
+                    const geometry = new THREE.SphereGeometry(0.6, 8, 8);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); // Gold color for highest activation
+                    const sphere = new THREE.Mesh(geometry, material);
+                    sphere.position.copy(position);
+                    scene.add(sphere);
+                }
+            });
+        } else { // Hidden layers with ReLU
+            layerPosition.forEach((position, neuronIndex) => {
+                if (layerActivation[neuronIndex] > threshold) {
+                    const geometry = new THREE.SphereGeometry(0.6, 8, 8);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); // Light blue for ReLU activated neurons
+                    const sphere = new THREE.Mesh(geometry, material);
+                    sphere.position.copy(position);
+                    scene.add(sphere);
+                }
+            });
+        }
     });
 }
+
 
 
 $(() => {
@@ -339,7 +353,7 @@ $(() => {
 
 $("#predict").on("click", async () => {
     let num = $("#test-select").val();
-    activationsArray = await model.predictWithActivations(trainData.pixels[num]);
+    activationsArray = (await model.predictWithActivations(trainData.pixels[num]));
     drawNeuralNet(6);
     highlightActivatedNeurons();
 })
