@@ -34,7 +34,7 @@ function getLayerValues() {
         }
     });
     layerSizes = newLayers.slice();
-    drawNeuralNet(6);
+    drawNeuralNet(10);
 }
 
 // Variables to track the movement
@@ -44,7 +44,7 @@ let moveLeft = false;
 let moveRight = false;
 let moveUp = false;
 let moveDown = false;
-let moveSpeed = 0.25;
+let moveSpeed = 0.5;
 let yaw = 1.2740000000000007;
 let pitch = -0.7560000000000004;
 let mouseSensitivity = 0.002;
@@ -354,6 +354,6 @@ $(() => {
 $("#predict").on("click", async () => {
     let num = $("#test-select").val();
     activationsArray = (await model.predictWithActivations(trainData.pixels[num]));
-    drawNeuralNet(6);
+    drawNeuralNet(10);
     highlightActivatedNeurons();
 })

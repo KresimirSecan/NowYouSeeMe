@@ -81,7 +81,7 @@ async function trainModel(trainData, trainLabels) {
     }
 
     const batchSize = 32;
-    const epochs = 10;
+    const epochs = 50;
     let finalAccuracy;
 
     await model.fit(trainData, trainLabels, {
