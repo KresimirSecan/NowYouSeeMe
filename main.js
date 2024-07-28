@@ -34,7 +34,7 @@ function getLayerValues() {
         }
     });
     layerSizes = newLayers.slice();
-    drawNeuralNet(10);
+    drawNeuralNet(6);
 }
 
 // Variables to track the movement
@@ -354,6 +354,6 @@ $(() => {
 $("#predict").on("click", async () => {
     let num = $("#test-select").val();
     activationsArray = (await model.predictWithActivations(trainData.pixels[num]));
-    drawNeuralNet(10);
+    drawNeuralNet(6);
     highlightActivatedNeurons();
 })
