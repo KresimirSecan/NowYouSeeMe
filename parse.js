@@ -60,26 +60,29 @@ function parseCSV(file) {
 
         ({trainData, testData} = trainTestSplit(data, testPercentage));
 
-        //Trim to fit
-        let trainDataTrimmed = false;
-        let testDataTrimmed = false;
+        //Trim to limit
+        const MAX_SAMPLES = 30000;
+        const trimData = (dataObj) => {
+            if (dataObj.labels.length > MAX_SAMPLES) {
+                dataObj.labels = dataObj.labels.slice(0, MAX_SAMPLES);
+                dataObj.pixels = dataObj.pixels.slice(0, MAX_SAMPLES);
+                return true;
+            }
+            return false;
+        };
 
-        if (trainData.labels.length > 30000) {
-            trainData.labels = trainData.labels.slice(0, 30000);
-            trainData.pixels = trainData.pixels.slice(0, 30000);
-            trainDataTrimmed = true;
-        }
-        if (testData.labels.length > 30000) {
-            testData.labels = testData.labels.slice(0, 30000);
-            testData.pixels = testData.pixels.slice(0, 30000);
-            testDataTrimmed = true;
-        }
+        const trainDataTrimmed = trimData(trainData);
+        const testDataTrimmed = trimData(testData);
 
         console.log("TrainTestSplit: ");
         console.log("Test data length: ", testData.labels.length);
         const labl = tf.tensor(testData.labels);
         labels = Array.from(tf.unique(labl).values.dataSync()).sort();
        
+        //parsing for training proces
+        trainData.labels = tf.oneHot(tf.tensor1d(trainData.labels, 'int32'), 10);
+        trainData.pixels = tf.stack(trainData.pixels);
+
         let alertMessage = "Data submitted.";
         if (trainDataTrimmed || testDataTrimmed) {
             alertMessage += " Note: The data was sliced to fit the 30,000 samples limit.";

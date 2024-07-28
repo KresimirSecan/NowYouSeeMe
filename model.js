@@ -3,7 +3,7 @@ import { trainData } from "./parse.js";
 import { testData } from "./parse.js";
 import { dataAvailable } from "./parse.js";
 
-export let activations = []
+export let activations = [];
 export let model;
 
 class CustomModel extends tf.Sequential {
@@ -18,25 +18,22 @@ class CustomModel extends tf.Sequential {
             inputTensor = inputTensor.expandDims(0);
         }
 
-    
         let activationTensor = inputTensor;
         const activationsArray = [];
-    
+
         activationsArray.push(Array.from(inputTensor.dataSync()));
         // Perform forward pass through all layers and collect activations
         for (let i = 0; i < modelLayers.length; i++) {
             activationTensor = modelLayers[i].apply(activationTensor);
             const activations = activationTensor.dataSync();
-            if(i > 0){
+            if (i > 0) {
                 activationsArray.push(Array.from(activations));
             }
         }
-    
+
         return activationsArray;
     }
 }
-
-
 
 // Function to create a model
 function createModel(layerSizes) {
@@ -75,13 +72,11 @@ function createModel(layerSizes) {
 }
 
 // Function to train a model
-async function trainModel(trainData, trainLabels) {
+async function trainModel(trainData, trainLabels, epochs = 10, batchSize = 32) {
     if (!trainData || !trainLabels) {
         throw new Error('Training data and labels must be provided');
     }
 
-    const batchSize = 32;
-    const epochs = 10;
     let finalAccuracy;
 
     await model.fit(trainData, trainLabels, {
@@ -98,6 +93,7 @@ async function trainModel(trainData, trainLabels) {
                 $('#epoch-info').hide();
                 $('#final-score').text(`Training finished. Final accuracy: ${finalAccuracy.toFixed(4)}`).show();
                 $('.spinner-border').hide();
+                $('#accuracy-display').text(`Accuracy: ${(finalAccuracy * 100).toFixed(2)}%`).show();
             }
         }
     });
@@ -109,6 +105,9 @@ $('#train').on('click', async () => {
         alert("Data is not available. Please load the data before training the model.");
         return;
     }
+
+    const epochs = parseInt($('#epochs').val()) || 10;
+    const batchSize = parseInt($('#batchSize').val()) || 32;
 
     if (model) {
         model.dispose();
@@ -125,12 +124,8 @@ $('#train').on('click', async () => {
         // Force browser to repaint before starting training
         requestAnimationFrame(async () => {
             model = createModel(layerSizes);
-            const oneHotEncodedLabels = tf.oneHot(trainData.labels.map(label => parseInt(label, 10)), 10);
-
-            await trainModel(tf.stack(trainData.pixels), oneHotEncodedLabels);
+            await trainModel(trainData.pixels, trainData.labels, epochs, batchSize);
             console.log("Model trained");
-
         });
     }, 0); 
 });
-
