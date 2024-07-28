@@ -1,4 +1,4 @@
-let layers = [784, 128, 64, 32, 16, 10];
+let layers = [784, 128, 64, 32, 10];
 let collapse = false;
 
 

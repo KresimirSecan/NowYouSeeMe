@@ -46,7 +46,7 @@ function createModel(layerSizes) {
         if (index === 0) {
             model.add(tf.layers.dense({
                 units: size,
-                activation: 'relu',
+                activation: 'relu6',
                 inputShape: [layerSizes[0]]
             }));
         } else if (index === layerSizes.length - 1) {
@@ -57,7 +57,7 @@ function createModel(layerSizes) {
         } else {
             model.add(tf.layers.dense({
                 units: size,
-                activation: 'relu'
+                activation: 'relu6'
             }));
         }
     });
