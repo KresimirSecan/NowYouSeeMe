@@ -353,7 +353,8 @@ $(() => {
 
 $("#predict").on("click", async () => {
     let num = $("#test-select").val();
-    activationsArray = (await model.predictWithActivations(trainData.pixels[num]));
+    let sampleTensor = trainData.pixels.slice([num, 0], [1, trainData.pixels.shape[1]]).squeeze();
+    activationsArray = await model.predictWithActivations(sampleTensor);
     drawNeuralNet(6);
     highlightActivatedNeurons();
 })
