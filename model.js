@@ -1,4 +1,4 @@
-import { layerSizes } from "./main.js";
+import { layerSizes } from "./render.js";
 import { trainData } from "./parse.js";
 import { testData } from "./parse.js";
 import { dataAvailable } from "./parse.js";
