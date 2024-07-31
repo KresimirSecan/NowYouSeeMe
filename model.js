@@ -22,7 +22,7 @@ class CustomModel extends tf.Sequential {
         const activationsArray = [];
 
         activationsArray.push(Array.from(inputTensor.dataSync()));
-        // Perform forward pass through all layers and collect activations
+
         for (let i = 0; i < modelLayers.length; i++) {
             activationTensor = modelLayers[i].apply(activationTensor);
             const activations = activationTensor.dataSync();
@@ -71,7 +71,7 @@ function createModel(layerSizes) {
     return model;
 }
 
-// Function to train a model
+// Function to train  model
 async function trainModel(trainData, trainLabels, epochs = 10, batchSize = 32) {
     if (!trainData || !trainLabels) {
         throw new Error('Training data and labels must be provided');
@@ -119,9 +119,7 @@ $('#train').on('click', async () => {
     $('#epoch-info').show();
     $('#final-score').hide();
 
-    // Use a slight delay to ensure the UI has time to update
     setTimeout(async () => {
-        // Force browser to repaint before starting training
         requestAnimationFrame(async () => {
             model = createModel(layerSizes);
             await trainModel(trainData.pixels, trainData.labels, epochs, batchSize);

@@ -35,7 +35,7 @@ function displayLayers() {
     // Add event listeners for input changes
     $('.layer-input').on('input', function () {
         let index = $(this).data('index');
-        layers[index] = parseInt($(this).val(), 10) || 0; // Update the corresponding layer value
+        layers[index] = parseInt($(this).val(), 10) || 0; 
     });
 }
 
@@ -48,8 +48,8 @@ function addLayer() {
 
 // Function to delete a layer
 function deleteLayer(index) {
-    layers.splice(index, 1); // Remove element from array
-    displayLayers(); // Redraw layers
+    layers.splice(index, 1); 
+    displayLayers(); 
 }
 
 

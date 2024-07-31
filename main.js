@@ -30,7 +30,7 @@ function getLayerValues() {
     $('.layer-input').each(function() {
         let value = $(this).val();
         if (value) {
-            newLayers.push(parseInt(value, 10)); // Parse as integer
+            newLayers.push(parseInt(value, 10)); 
         }
     });
     layerSizes = newLayers.slice();
@@ -49,11 +49,10 @@ let yaw = 1.2740000000000007;
 let pitch = -0.7560000000000004;
 let mouseSensitivity = 0.002;
 
-// Event listeners for keyboard input
+// Event listeners for keyboard input and click to activate 
 $(document).on('keydown', onKeyDown);
 $(document).on('keyup', onKeyUp);
 
-// Request pointer lock on click
 $(renderer.domElement).on('click', () => {
     renderer.domElement.requestPointerLock();
 });
@@ -116,12 +115,12 @@ function onMouseMove(event) {
     yaw -= event.originalEvent.movementX * mouseSensitivity;
     pitch -= event.originalEvent.movementY * mouseSensitivity;
 
-    // Limit the pitch angle to avoid flipping the camera
+    // Limit the pitch angle to avoid flipping 
     pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
 }
 
 function updateCameraPosition() {
-    // Calculate the forward and right vectors based on camera rotation
+
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
     const forward = direction.clone().normalize();
@@ -146,7 +145,6 @@ function updateCameraPosition() {
         camera.position.y -= moveSpeed;
     }
 
-    // Set camera rotation using quaternions
     const quaternion = new THREE.Quaternion();
     quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
     camera.quaternion.copy(quaternion);
@@ -169,27 +167,21 @@ $(window).on('resize', () => {
 });
 
 function drawNeuralNet(layerDistance) {
-    // Clear the scene
     scene.remove.apply(scene, scene.children);
 
     layerPositions.length = 0;
 
-    // Sphere geometry and material for neurons
     const sphereGeometry = new THREE.SphereGeometry(0.5, 8, 8);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x444444 });
 
-    // Calculate total number of neurons
     let totalNeurons = layerSizes.reduce((acc, size) => acc + size, 0);
     
-    // Create InstancedMesh for neurons
     const instancedMesh = new THREE.InstancedMesh(sphereGeometry, sphereMaterial, totalNeurons);
 
-    // Distance between neurons
     const distance = 2;
     let zPos = 0;
     let instanceIndex = 0;
 
-    // Store positions of spheres for each layer
     for (let layerSize of layerSizes) {
         const layerPosition = [];
         const a = Math.sqrt(layerSize);
@@ -203,7 +195,6 @@ function drawNeuralNet(layerDistance) {
                 const position = new THREE.Vector3(xPos, yPos, zPos);
                 layerPosition.push(position);
 
-                // Set instance matrix
                 const matrix = new THREE.Matrix4();
                 matrix.setPosition(position);
                 instancedMesh.setMatrixAt(instanceIndex, matrix);
@@ -282,22 +273,21 @@ function addLabelsToLastLayer(labels) {
 
     // Load font asynchronously
     fontLoader.load('https://cdn.jsdelivr.net/npm/three@0.166.1/examples/fonts/helvetiker_regular.typeface.json', function(font) {
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); // White color for text
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff }); 
 
-        // Iterate over positions in the last layer
         for (let i = 0; i < lastLayerPositions.length; i++) {
             let position = lastLayerPositions[i];
 
-            // Create label text geometry
+
             const textGeometry = new TextGeometry(labels[i].toString(), {
                 font: font,
-                size: 1, // Size of the text
-                depth: 0.01 // Thickness of the text
+                size: 1, 
+                depth: 0.01 
             });
 
             // Create text mesh and position it behind neuron
             let textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            textMesh.position.copy(new THREE.Vector3(position.x, position.y - 0.5, position.z - 2)); // Adjust position behind neuron
+            textMesh.position.copy(new THREE.Vector3(position.x, position.y - 0.5, position.z - 2)); 
             texts.push(textMesh);
             scene.add(textMesh);
         }
@@ -319,22 +309,22 @@ function highlightActivatedNeurons() {
 
         const threshold = 0.5;
 
-        if (layerIndex === layerPositions.length - 1) { // Output layer with softmax
+        if (layerIndex === layerPositions.length - 1) { 
             const maxActivation = Math.max(...layerActivation);
             layerPosition.forEach((position, neuronIndex) => {
                 if (layerActivation[neuronIndex] === maxActivation) {
                     const geometry = new THREE.SphereGeometry(0.6, 8, 8);
-                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); // Gold color for highest activation
+                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); 
                     const sphere = new THREE.Mesh(geometry, material);
                     sphere.position.copy(position);
                     scene.add(sphere);
                 }
             });
-        } else { // Hidden layers with ReLU
+        } else { 
             layerPosition.forEach((position, neuronIndex) => {
                 if (layerActivation[neuronIndex] > threshold) {
                     const geometry = new THREE.SphereGeometry(0.6, 8, 8);
-                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); // Light blue for ReLU activated neurons
+                    const material = new THREE.MeshBasicMaterial({ color: 0xADD8E6 }); 
                     const sphere = new THREE.Mesh(geometry, material);
                     sphere.position.copy(position);
                     scene.add(sphere);

@@ -79,7 +79,7 @@ function parseCSV(file) {
         const labl = tf.tensor(testData.labels);
         labels = Array.from(tf.unique(labl).values.dataSync()).sort();
        
-        //parsing for training proces
+        // Parsing for training proces (expensive)
         trainData.labels = tf.oneHot(tf.tensor1d(trainData.labels, 'int32'), 10);
         trainData.pixels = tf.stack(trainData.pixels);
 
@@ -120,7 +120,7 @@ $('#submitPercentage').on('click', function () {
     }
 });
 
-// Data is formatted as an array of ['label', pixelArray]
+// Data is formatted as an array of ['label', pixelArray] (mnist like datasets)
 function trainTestSplit(data, testPercentage) {
     const testSize = Math.floor(data.length * (testPercentage / 100));
 
@@ -130,7 +130,6 @@ function trainTestSplit(data, testPercentage) {
 
     const pixelTensors = pixels.map(pixelArray => tf.tensor(pixelArray));
 
-    // Train-test split
     const trainPixels = pixelTensors.slice(testSize);
     const testPixels = pixelTensors.slice(0, testSize);
     const trainLabels = labels.slice(testSize);
