@@ -2,6 +2,12 @@
 
 Welcome to an intuitive neural network visualization tool designed to help you understand and visualize the inner workings of neural networks. This guide will assist you in setting up, running, and effectively utilizing the tool on your local machine.
 
+
+
+https://github.com/user-attachments/assets/2fa0503c-32b6-477e-84d3-9d1f81242841
+
+
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
