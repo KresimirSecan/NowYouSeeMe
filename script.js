@@ -48,8 +48,12 @@ function addLayer() {
 
 // Function to delete a layer
 function deleteLayer(index) {
-    layers.splice(index, 1); 
-    displayLayers(); 
+    if(layers.length !== 2){
+        layers.splice(index, 1); 
+        displayLayers(); 
+    } else {
+        alert("Can't have less than 2 layers.")
+    }
 }
 
 

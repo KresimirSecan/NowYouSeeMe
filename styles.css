@@ -14,4 +14,12 @@ body {
     width: 300px; 
 }
 
+#controls {
+    position: fixed;
+    bottom: 0;
+    color: white;
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
+}
 
