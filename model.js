@@ -5,6 +5,7 @@ import { dataAvailable } from "./parse.js";
 
 export let activations = [];
 export let model;
+let stopTraining = false;
 
 class CustomModel extends tf.Sequential {
     constructor() {
@@ -35,7 +36,6 @@ class CustomModel extends tf.Sequential {
     }
 }
 
-// Function to create a model
 function createModel(layerSizes) {
     if (!Array.isArray(layerSizes) || layerSizes.length === 0) {
         throw new Error('layerSizes must be a non-empty array');
@@ -71,11 +71,12 @@ function createModel(layerSizes) {
     return model;
 }
 
-// Function to train  model
 async function trainModel(trainData, trainLabels, epochs = 10, batchSize = 32) {
     if (!trainData || !trainLabels) {
         throw new Error('Training data and labels must be provided');
     }
+
+    stopTraining = false;
 
     let finalAccuracy;
 
@@ -85,21 +86,67 @@ async function trainModel(trainData, trainLabels, epochs = 10, batchSize = 32) {
         validationSplit: 0.2,
         callbacks: {
             onEpochEnd: (epoch, logs) => {
+                if (stopTraining) {
+                    model.stopTraining = true;
+                }
                 $('#epoch-info').text(`Epoch ${epoch + 1}: loss = ${logs.loss.toFixed(4)}, accuracy = ${logs.acc.toFixed(4)}`);
                 console.log(`Epoch ${epoch + 1}: loss = ${logs.loss.toFixed(4)}, accuracy = ${logs.acc.toFixed(4)}`);
                 finalAccuracy = logs.acc;
             },
             onTrainEnd: () => {
-                $('#epoch-info').hide();
-                $('#final-score').text(`Training finished. Final accuracy: ${finalAccuracy.toFixed(4)}`).show();
-                $('.spinner-border').hide();
-                $('#accuracy-display').text(`Accuracy: ${(finalAccuracy * 100).toFixed(2)}%`).show();
+                if (!stopTraining) {
+                    $('#epoch-info').hide();
+                    $('#final-score').text(`Training finished. Final accuracy: ${finalAccuracy.toFixed(4)}`).show();
+                    $('.spinner-border').hide();
+                    $('#accuracy-display').text(`Accuracy: ${(finalAccuracy * 100).toFixed(2)}%`).show();
+                } else {
+                    $('#epoch-info').text('Training was canceled.');
+                }
             }
         }
     });
 }
 
-// Handle Train button click
+async function predictAndCalculateAccuracy(testData, testLabels) {
+    if (!testData || !testLabels || !model) {
+        throw new Error('Test data, labels, and trained model must be provided');
+    }
+
+    if (Array.isArray(testData)) {
+        testData = tf.stack(testData);
+    }
+
+    if (Array.isArray(testLabels)) {
+        testLabels = tf.tensor(testLabels);
+    }
+
+    if (testLabels.shape.length > 1) {
+        testLabels = testLabels.argMax(1);
+    }
+
+    const predictions = model.predict(testData);
+
+    const predictedLabels = predictions.argMax(1).dataSync();
+
+    const actualLabels = testLabels.dataSync();
+
+    console.log("Predicted Labels:", predictedLabels);
+    console.log("Actual Labels:", actualLabels);
+
+    let correctPredictions = 0;
+    for (let i = 0; i < predictedLabels.length; i++) {
+        if (predictedLabels[i] === +actualLabels[i]) {
+            correctPredictions++;
+        }
+    }
+    const accuracy = (correctPredictions / predictedLabels.length) * 100;
+
+    console.log(`Accuracy on test data: ${accuracy.toFixed(2)}%`);
+    return accuracy;
+}
+
+
+
 $('#train').on('click', async () => {
     if (!dataAvailable) {
         alert("Data is not available. Please load the data before training the model.");
@@ -124,6 +171,14 @@ $('#train').on('click', async () => {
             model = createModel(layerSizes);
             await trainModel(trainData.pixels, trainData.labels, epochs, batchSize);
             console.log("Model trained");
+
+            const testAccuracy = await predictAndCalculateAccuracy(testData.pixels, testData.labels);
+            $('#accuracy-display').text(`Test Accuracy: ${testAccuracy.toFixed(2)}%`).show();
         });
     }, 0); 
+});
+
+
+$('#trainingModal').on('hidden.bs.modal', function () {
+    stopTraining = true;
 });

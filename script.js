@@ -2,7 +2,6 @@ let layers = [784, 128, 64, 32, 10];
 let collapse = false;
 
 
-// Function to toggle collapse
 function toggleCollapse() {
     collapse = !collapse;
     let button = $('#collapse-btn');
@@ -14,13 +13,11 @@ function toggleCollapse() {
     }
 }
 
-// Function to display file name using jQuery
 function displayFileName() {
     const fileName = $('#file-upload').prop('files')[0]?.name || '';
     $('#file-name').text(fileName);
 }
 
-// Function to display layers
 function displayLayers() {
     let layerContainer = $('#layer-container');
     layerContainer.empty();
@@ -32,21 +29,18 @@ function displayLayers() {
         layerContainer.append(layer);
     }
 
-    // Add event listeners for input changes
     $('.layer-input').on('input', function () {
         let index = $(this).data('index');
         layers[index] = parseInt($(this).val(), 10) || 0; 
     });
 }
 
-// Function to add a layer
 function addLayer() {
     let value = $('#layer-input').val();
     layers.push(+value);
     displayLayers();
 }
 
-// Function to delete a layer
 function deleteLayer(index) {
     if(layers.length !== 2){
         layers.splice(index, 1); 
@@ -56,9 +50,6 @@ function deleteLayer(index) {
     }
 }
 
-
-
-// Document ready function
 $(document).ready(function () {
     displayLayers();
 });
